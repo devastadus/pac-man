@@ -23,7 +23,13 @@ public class GhostMove : MonoBehaviour
 
 	    Vector2 dir = waypoints[cur].position - transform.position;
         GetComponent<Animator>().SetFloat("DirX",dir.x);
-        GetComponent<Animator>().SetFloat("DirY",dir.y);
+        GetComponent<Animator>().SetFloat("DirY",dir.y); 
 
+    }
+
+    void OnTriggerEnter2D(Collider2D co)
+    {
+        if(co.name == "pacman")
+            Destroy(co.gameObject);
     }
 }
