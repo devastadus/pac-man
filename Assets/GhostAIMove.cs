@@ -9,6 +9,7 @@ public class GhostAIMove : MonoBehaviour
     public Transform[] waypoints;
     public float speed = 0.3f;
     private Transform currentWayPoint;
+    public GameObject player;
 
     public LayerMask layer;
 
@@ -34,30 +35,35 @@ public class GhostAIMove : MonoBehaviour
             Vector2 pos = transform.position;
             List<Transform> points = new List<Transform>();
             RaycastHit2D hit;
+            float shortestDistance =600;
+            bool playerFound = false;
             int mask = LayerMask.NameToLayer("Waypoint");
             int res = 1 << mask;
 
-            hit = Physics2D.Linecast(pos, Vector2.up * 100, layer);
-            waypointhit(hit, ref points);
+            hit = Physics2D.Linecast(pos+Vector2.up, Vector2.up * 100, layer);
+            waypointhit(hit, ref points, ref playerFound);
 
-            hit = Physics2D.Linecast(pos, Vector2.down * 100, layer);
-            waypointhit(hit, ref points);
+            hit = Physics2D.Linecast(pos+Vector2.down, Vector2.down * 100, layer);
+            waypointhit(hit, ref points, ref playerFound);
 
-            Debug.DrawRay(pos, Vector2.left * 100);
-            hit = Physics2D.Linecast(pos, Vector2.left * 100, layer);
-            waypointhit(hit, ref points);
+            Debug.DrawRay(pos+Vector2.left, Vector2.left * 100);
+            hit = Physics2D.Linecast(pos+Vector2.left, Vector2.left * 100, layer);
+            waypointhit(hit, ref points, ref playerFound);
 
-            hit = Physics2D.Linecast(pos, Vector2.right * 100, layer);
-            waypointhit(hit, ref points);
+            hit = Physics2D.Linecast(pos+Vector2.right, Vector2.right * 100, layer);
+            waypointhit(hit, ref points, ref playerFound);
             Debug.Log("bam");
 
-
-
-
-
-
-
-            //  cur = (cur + 1) % waypoints.Length;
+            foreach (Transform point in points)
+            {
+                float dist = Vector2.Distance(point.position, player.transform.position);
+                if (dist < shortestDistance)
+                {
+                    shortestDistance = dist;
+                    currentWayPoint = point;
+                }
+                    
+            }
         }
 
         Vector2 dir = currentWayPoint.position - transform.position;
@@ -66,9 +72,15 @@ public class GhostAIMove : MonoBehaviour
 
     }
 
-    void waypointhit(RaycastHit2D hit, ref List<Transform> list)
+    void waypointhit(RaycastHit2D hit, ref List<Transform> list, ref bool playerFound)
     {
-        if (hit && hit.collider.gameObject.tag == "Waypoint")
+        if (hit && hit.collider.gameObject.tag == "Player")
+        {
+            list.Clear();
+            playerFound = true;
+            list.Add(hit.transform);
+        }
+        if (hit && !playerFound && hit.collider.gameObject.tag == "Waypoint")
         {
             list.Add(hit.transform);
         }
