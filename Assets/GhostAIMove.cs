@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class GhostAIMove : MonoBehaviour
 {
@@ -8,6 +9,8 @@ public class GhostAIMove : MonoBehaviour
     public Transform[] waypoints;
     public float speed = 0.3f;
     private Transform currentWayPoint;
+
+    public LayerMask layer;
 
     void Start()
     {
@@ -28,17 +31,47 @@ public class GhostAIMove : MonoBehaviour
         //find a new waypoint
         else
         {
-            foreach (Transform waypoint in waypoints)
-            {
+            Vector2 pos = transform.position;
+            List<Transform> points = new List<Transform>();
+            RaycastHit2D hit;
+            int mask = LayerMask.NameToLayer("Waypoint");
+            int res = 1 << mask;
 
-                
-            }
-          //  cur = (cur + 1) % waypoints.Length;
+            hit = Physics2D.Linecast(pos, Vector2.up * 100, layer);
+            waypointhit(hit, ref points);
+
+            hit = Physics2D.Linecast(pos, Vector2.down * 100, layer);
+            waypointhit(hit, ref points);
+
+            Debug.DrawRay(pos, Vector2.left * 100);
+            hit = Physics2D.Linecast(pos, Vector2.left * 100, layer);
+            waypointhit(hit, ref points);
+
+            hit = Physics2D.Linecast(pos, Vector2.right * 100, layer);
+            waypointhit(hit, ref points);
+            Debug.Log("bam");
+
+
+
+
+
+
+
+            //  cur = (cur + 1) % waypoints.Length;
         }
 
         Vector2 dir = currentWayPoint.position - transform.position;
         GetComponent<Animator>().SetFloat("DirX", dir.x);
         GetComponent<Animator>().SetFloat("DirY", dir.y);
+
+    }
+
+    void waypointhit(RaycastHit2D hit, ref List<Transform> list)
+    {
+        if (hit && hit.collider.gameObject.tag == "Waypoint")
+        {
+            list.Add(hit.transform);
+        }
 
     }
 
